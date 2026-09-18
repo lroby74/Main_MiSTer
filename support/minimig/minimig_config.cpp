@@ -26,7 +26,8 @@ const char *config_memory_chip_msg[] = { "512K", "1M",   "1.5M", "2M" };
 const char *config_memory_slow_msg[] = { "none", "512K", "1M",   "1.5M" };
 const char *config_memory_fast_msg[][8] = { { "none", "2M", "4M", "8M", "8M",    "8M",    "8M",   "8M" } ,
 											{ "none", "2M", "4M", "8M", "256M", "384M", "256M", "256M" } };
-const char *config_cpu_msg[] = { "68000", "68010", "-----","68020" };
+const char *config_cpu_msg[] = { "68000", "68010", "68030", "68020" };
+const char *config_cpu030_msg[] = { " 25MHz", " 40MHz", " 50MHz", " Fast" };
 const char *config_chipset_msg[] = { "OCS-A500", "OCS-A1000", "ECS", "---", "---", "---", "AGA", "---" };
 
 typedef struct
@@ -610,8 +611,6 @@ int minimig_cfg_load(int num)
 		BootPrintEx(">>> No config found. Using defaults. <<<");
 	}
 
-	if ((minimig_config.cpu & 0x03) == 0x02) minimig_config.cpu |= 0x01;
-
 	a2065_cfg_set(minimig_config.a2065_mode);
 
 	for (int i = 0; i < 4; i++)
@@ -855,7 +854,8 @@ void minimig_ConfigMemory(unsigned char memory)
 
 void minimig_ConfigCPU(unsigned char cpu)
 {
-	spi_uio_cmd8(UIO_MM2_CPU, cpu & 0x3f);
+	// 7-6 68030 clock, 5 68020 stock speed, 4-2 cache, 1-0 CPU type
+	spi_uio_cmd8(UIO_MM2_CPU, cpu);
 }
 
 void minimig_ConfigChipset(mm_configTYPE *config)
